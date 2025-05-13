@@ -1,14 +1,14 @@
 #!/bin/bash
 
-# Connect to MongoDB and retrieve the current replica set configuration
-cfg=$(mongosh --host 192.168.61.29 --quiet --eval 'JSON.stringify(rs.conf())')
+# Connect to MongoDB and obtain the current replica set configuration
+current_cfg=$(mongosh --host 192.168.61.29 --quiet --eval 'rs.conf()')
 
-# Update the configuration priorities to set primary and secondary
-updated_cfg=$(echo "$cfg" | jq '(.members[] | select(.host == "192.168.61.29:27017").priority) |= 2 | 
-                                  (.members[] | select(.host == "192.168.61.66:27016").priority) |= 1')
+# Prepare the updated configuration with priority settings
+updated_cfg=$(echo "$current_cfg" | sed 's/\("host": "192.168.61.29:27017",$"priority": [0-9]/\1"priority": 2/' | \
+                                 sed 's/\("host": "192.168.61.66:27016",$"priority": [0-9]/\1"priority": 1/')
 
-# Reconfigure the replica set with updated priorities
-mongosh --host 192.168.61.29 --eval "rs.reconfig($updated_cfg)"
+# Apply the updated replica set configuration
+mongosh --host 192.168.61.29 --quiet --eval "rs.reconfig($updated_cfg)"
 
-# Verify the status to confirm the changes
-mongosh --host 192.168.61.29 --eval 'rs.status()'
+# Output the status of the replica set to verify changes
+mongosh --host 192.168.61.29 --quiet --eval 'rs.status()'
