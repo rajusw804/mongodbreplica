@@ -1,6 +1,6 @@
 // processCasinoTransactions.js
 
-// Connect to the database
+// Connect to the casino_system database
 const db = connect('localhost/casino_system');
 
 // Fetch tenant IDs associated with the admin user
@@ -24,7 +24,7 @@ const userIds = adminTenantUsersCursor.map(doc => doc.user_id);
 // Define an offset for transaction fetching; this must be set dynamically outside this script
 const offset = 0;  // Example static offset, adjust as necessary
 
-// Fetch casino transaction data for the given users
+// Fetch casino transaction data for the given users with pagination and sorting
 const batchDataCursor = db.casino_transactions.find({
   user_id: { $in: userIds }
 }).sort({ casino_transaction_id: 1 }).limit(1000).skip(offset);
@@ -36,10 +36,10 @@ function prepareTransactionUpdate(transaction) {
   // Creating a simplified, safe transaction object for updates
   const safeUpdate = {
     casino_transaction_id: transaction.casino_transaction_id,
-    // Adding relevant fields that don't pose circular reference issues
+    // Add other fields from transaction that are needed for the update
     field1: transaction.field1,
     field2: transaction.field2
-    // Continue to add other fields that need updating
+    // Add other necessary fields
   };
   
   return { $set: safeUpdate };
