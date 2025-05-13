@@ -12,7 +12,7 @@ try {
 }
 
 // Fetch tenant IDs associated with the admin user
-const adminTenantsCursor = db.tenants.find({ admin_user_id: 425 });
+const adminTenantsCursor = db.tenants.find({ admin_user_id: 617 });
 const adminTenants = adminTenantsCursor.map(doc => doc.tenant_id);
 
 // Fetch license IDs for the relevant tenants
